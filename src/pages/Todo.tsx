@@ -1,27 +1,24 @@
 import { useState } from 'react'
+import { addTodo, removeTodo, toggleTodo } from '../redux/todoSlice'
+import { useAppDispatch, useAppSelector } from '../redux/hooks'
 
 import '../index.css'
 import '../output.css'
 
-type TodoType = {
+export type TodoType = {
   id: number
   text: string
   completed: boolean
+  todos: TodoType[]
 }
 
 
-function Todo() {
 
-  const [todos, setTodos] = useState<TodoType[]>([])
-  const [input, setInput] = useState('') 
+const Todo: React.FC = () => {
 
-  const addTodo = () => {
-    if (input.trim() !== '') {
-      setTodos([...todos, { id: Date.now(), text: input, completed: false }])
-      setInput('')
-    }
-  }
-
+  const dispatch = useAppDispatch()
+  const todos = useAppSelector((state) => state.todo.todos)
+  const [input, setInput] = useState('')
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-950 to-purple-600">
@@ -36,7 +33,7 @@ function Todo() {
             placeholder='Add a new todo' 
             className='flex-grow px-3 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500'/>
           <button 
-            onClick={addTodo} 
+            onClick={() => dispatch(addTodo({id: Date.now(), text: input, completed: false}))} 
             className='px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'>Add</button>
         </div>
 
@@ -48,13 +45,13 @@ function Todo() {
               <input 
                 type='checkbox'
                 checked={todo.completed}
-                onChange={() => setTodos(todos.map((t) => t.id === todo.id ? {...t, completed: !t.completed} : t))} 
+                onChange={() => dispatch(toggleTodo(todo.id))} 
                 className='mr-2 h-5 w-5 text-purple-600 bg-gray-100 border-gray-300 rounded' />
               <span 
                 className={`flex-grow ${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>{todo.text}</span>
 
                 <button 
-                  onClick={() => setTodos(todos.filter((t) => t.id !== todo.id))} 
+                  onClick={() => dispatch(removeTodo(todo.id))} 
                   className='px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500'>Delete</button>
             </li>
           ))}
